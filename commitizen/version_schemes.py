@@ -93,6 +93,24 @@ class VersionProtocol(Protocol):
         """The third item of :attr:`release` or ``0`` if unavailable."""
         raise NotImplementedError("must be implemented")
 
+    def __lt__(self, other: VersionProtocol) -> bool:
+        raise NotImplementedError("must be implemented")
+
+    def __le__(self, other: VersionProtocol) -> bool:
+        raise NotImplementedError("must be implemented")
+
+    def __eq__(self, other: object) -> bool:
+        raise NotImplementedError("must be implemented")
+
+    def __ge__(self, other: VersionProtocol) -> bool:
+        raise NotImplementedError("must be implemented")
+
+    def __gt__(self, other: VersionProtocol) -> bool:
+        raise NotImplementedError("must be implemented")
+
+    def __ne__(self, other: object) -> bool:
+        raise NotImplementedError("must be implemented")
+
     def bump(
         self,
         increment: str,
@@ -166,7 +184,7 @@ class BaseVersion(_BaseVersion):
 
         return f"dev{devrelease}"
 
-    def increment_base(self, increment: str | None = None) -> str:
+    def increment_base(self, increment: str | None = None, force: bool = False) -> str:
         prev_release = list(self.release)
         increments = [MAJOR, MINOR, PATCH]
         base = dict(zip_longest(increments, prev_release, fillvalue=0))
@@ -175,7 +193,7 @@ class BaseVersion(_BaseVersion):
         # must remove its prerelease tag,
         # so it doesn't matter the increment.
         # Example: 1.0.0a0 with PATCH/MINOR -> 1.0.0
-        if not self.is_prerelease:
+        if not self.is_prerelease or force:
             if increment == MAJOR:
                 base[MAJOR] += 1
                 base[MINOR] = 0
@@ -190,7 +208,7 @@ class BaseVersion(_BaseVersion):
 
     def bump(
         self,
-        increment: str,
+        increment: str | None,
         prerelease: str | None = None,
         prerelease_offset: int = 0,
         devrelease: int | None = None,
@@ -212,7 +230,9 @@ class BaseVersion(_BaseVersion):
             local_version = self.scheme(self.local).bump(increment)
             return self.scheme(f"{self.public}+{local_version}")  # type: ignore
         else:
+            # force = False  #self.prerelease and prerelease and prerelease[0] < self.prerelease[0]
             base = self.increment_base(increment)
+            # print("bump", self, repr(increment), base, force, prerelease[0], self.pre[0])
             dev_version = self.generate_devrelease(devrelease)
             pre_version = self.generate_prerelease(prerelease, offset=prerelease_offset)
             # TODO: post version
