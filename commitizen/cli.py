@@ -231,6 +231,14 @@ data = {
                         "type": str.upper,
                     },
                     {
+                        "name": ["--force-prerelease", "-fp"],
+                        "action": "store_true",
+                        "help": "when bumping a prerelease to a new prerelease, "
+                                "honor the detected increment and preserve the "
+                                "prerelease suffix, rather than bumping to the "
+                                "next non-prerelease version",
+                    },
+                    {
                         "name": ["--check-consistency", "-cc"],
                         "help": (
                             "check consistency among versions defined in "

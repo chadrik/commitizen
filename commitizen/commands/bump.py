@@ -47,6 +47,7 @@ class Bump:
                     "tag_format",
                     "prerelease",
                     "increment",
+                    "force_prerelease",
                     "bump_message",
                     "gpg_sign",
                     "annotated_tag",
@@ -147,6 +148,7 @@ class Bump:
         dry_run: bool = self.arguments["dry_run"]
         is_yes: bool = self.arguments["yes"]
         increment: str | None = self.arguments["increment"]
+        force_prerelease: bool = self.arguments["force_prerelease"]
         prerelease: str | None = self.arguments["prerelease"]
         devrelease: int | None = self.arguments["devrelease"]
         is_files_only: bool | None = self.arguments["files_only"]
@@ -177,6 +179,11 @@ class Bump:
                 raise NotAllowed(
                     "--prerelease-offset cannot be combined with MANUAL_VERSION"
                 )
+
+        if not prerelease and force_prerelease:
+            raise NotAllowed(
+                "--force-prerelease is only valid with --prerelease"
+            )
 
         if major_version_zero:
             if not current_version.release[0] == 0:
@@ -226,12 +233,16 @@ class Bump:
                     "To avoid this error, manually specify the type of increment with `--increment`"
                 )
 
-            # Increment is removed when current and next version
-            # are expected to be prereleases.
-            if prerelease and current_version.is_prerelease:
-                increment = None
+            base_version = current_version
+            if prerelease and current_version.prerelease:
+                if increment and force_prerelease:
+                    base_version = current_version.bump(increment)
+                else:
+                    # Increment is removed when current and next version
+                    # are expected to be prereleases.
+                    increment = None
 
-            new_version = current_version.bump(
+            new_version = base_version.bump(
                 increment,
                 prerelease=prerelease,
                 prerelease_offset=prerelease_offset,

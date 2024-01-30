@@ -218,12 +218,64 @@ def test_bump_command_prelease(mocker: MockFixture):
     tag_exists = git.tag_exist("0.2.0a0")
     assert tag_exists is True
 
+    # PRERELEASE + PATCH BUMP
+    # a feature change still results in a patch bump when requesting prerelease
+    create_file_and_commit("feat: location")
+
+    testargs = ["cz", "bump", "--prerelease", "alpha", "--yes"]
+    mocker.patch.object(sys, "argv", testargs)
+    cli.main()
+
+    tag_exists = git.tag_exist("0.2.0a1")
+    assert tag_exists is True
+
     # PRERELEASE BUMP CREATES VERSION WITHOUT PRERELEASE
     testargs = ["cz", "bump"]
     mocker.patch.object(sys, "argv", testargs)
     cli.main()
 
     tag_exists = git.tag_exist("0.2.0")
+    assert tag_exists is True
+
+
+@pytest.mark.usefixtures("tmp_commitizen_project")
+def test_bump_command_prelease_force_prerelease(mocker: MockFixture):
+    # PRERELEASE
+    create_file_and_commit("feat: location")
+
+    testargs = ["cz", "bump", "--prerelease", "alpha", "--yes"]
+    mocker.patch.object(sys, "argv", testargs)
+    cli.main()
+
+    tag_exists = git.tag_exist("0.2.0a0")
+    assert tag_exists is True
+
+    # PRERELEASE + PATCH BUMP
+    testargs = ["cz", "bump", "--prerelease", "alpha", "--yes", "--force-prerelease"]
+    mocker.patch.object(sys, "argv", testargs)
+    cli.main()
+
+    tag_exists = git.tag_exist("0.2.0a1")
+    assert tag_exists is True
+
+    # PRERELEASE + MINOR BUMP
+    # --force-prerelease allows the minor version to bump, and restart the prerelease
+    create_file_and_commit("feat: location")
+
+    testargs = ["cz", "bump", "--prerelease", "alpha", "--yes", "--force-prerelease"]
+    mocker.patch.object(sys, "argv", testargs)
+    cli.main()
+
+    tag_exists = git.tag_exist("0.3.0a0")
+    assert tag_exists is True
+
+    # PRERELEASE + MAJOR BUMP
+    # --force-prerelease allows the major version to bump, and restart the prerelease
+    testargs = ["cz", "bump", "--prerelease", "alpha", "--yes", "--increment=MAJOR", "--force-prerelease"]
+    mocker.patch.object(sys, "argv", testargs)
+    cli.main()
+
+    tag_exists = git.tag_exist("1.0.0a0")
     assert tag_exists is True
 
 
