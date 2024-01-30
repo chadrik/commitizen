@@ -52,6 +52,7 @@ class Bump:
                     "tag_format",
                     "prerelease",
                     "increment",
+                    "exact",
                     "bump_message",
                     "gpg_sign",
                     "annotated_tag",
@@ -157,6 +158,7 @@ class Bump:
         is_files_only: bool | None = self.arguments["files_only"]
         is_local_version: bool = self.arguments["local_version"]
         manual_version = self.arguments["manual_version"]
+        exact_mode: bool = self.arguments["exact"]
 
         if manual_version:
             if increment:
@@ -182,6 +184,9 @@ class Bump:
                 raise NotAllowed(
                     "--prerelease-offset cannot be combined with MANUAL_VERSION"
                 )
+
+        if not prerelease and exact_mode:
+            raise NotAllowed("--exact is only valid with --prerelease")
 
         if major_version_zero:
             if not current_version.release[0] == 0:
@@ -237,6 +242,7 @@ class Bump:
                 prerelease_offset=prerelease_offset,
                 devrelease=devrelease,
                 is_local_version=is_local_version,
+                exact_mode=exact_mode,
             )
 
         new_tag_version = bump.normalize_tag(

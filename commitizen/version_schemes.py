@@ -129,10 +129,17 @@ class VersionProtocol(Protocol):
         prerelease_offset: int = 0,
         devrelease: int | None = None,
         is_local_version: bool = False,
-        force_bump: bool = False,
+        exact_mode: bool = False,
     ) -> Self:
         """
         Based on the given increment, generate the next bumped version according to the version scheme
+
+        Args:
+            increment: The component to increase
+            prerelease: The type of prerelease, if Any
+            is_local_version: Whether to increment the local version instead
+            exact_mode: Treat the increment and prerelease arguments explicitly.  Disables logic
+                that attempts to deduce the correct increment when a prelease suffix is present.
         """
 
 
@@ -226,7 +233,7 @@ class BaseVersion(_BaseVersion):
         prerelease_offset: int = 0,
         devrelease: int | None = None,
         is_local_version: bool = False,
-        force_bump: bool = False,
+        exact_mode: bool = False,
     ) -> Self:
         """Based on the given increment a proper semver will be generated.
 
@@ -246,7 +253,7 @@ class BaseVersion(_BaseVersion):
         else:
             if not self.is_prerelease:
                 base = self.increment_base(increment)
-            elif force_bump:
+            elif exact_mode:
                 base = self.increment_base(increment)
             else:
                 base = f"{self.major}.{self.minor}.{self.micro}"

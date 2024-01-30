@@ -231,6 +231,15 @@ data = {
                         "type": str.upper,
                     },
                     {
+                        "name": ["--exact"],
+                        "action": "store_true",
+                        "help": (
+                            "treat the increment and prerelease arguments "
+                            "explicitly.  Disables logic that attempts to deduce "
+                            "the correct increment when a prelease suffix is present."
+                        ),
+                    },
+                    {
                         "name": ["--check-consistency", "-cc"],
                         "help": (
                             "check consistency among versions defined in "
